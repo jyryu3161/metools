@@ -16,7 +16,7 @@ from me_targeting.flux_analysis import FSEOF
 from me_targeting.flux_analysis import FVSEOF
 from me_targeting.flux_analysis import Simulator
 
-def run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, minimum_production_rate, constraints, targeting_mode='reaction', target_num=1, use_multi_cpu=False):
+def run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, minimum_production_rate, constraints, targeting_mode='reaction', target_num=1):
 
     candidate_reactions = []    
     for each_reaction in cobra_model.reactions:
@@ -105,7 +105,7 @@ def main():
     
     constraints = {}
     run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'reaction', 1)            
-    run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'reaction', 2, True)
+#     run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'reaction', 2)
     run_FSEOF_targeting(output_dir, cobra_model, biomass_reaction, target_reaction)
     run_FVSEOF_targeting(output_dir, cobra_model, biomass_reaction, target_reaction)
     
