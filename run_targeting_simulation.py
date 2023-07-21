@@ -34,34 +34,31 @@ def run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reactio
     fp = open(output_dir+'/MOMA_result_target_num_%s.txt'%(target_num), 'w')
     fp.write('reaction(s)\tbiomass flux\ttarget flux\n')
     
+    flux_constraints = {}
+    obj = Simulator.Simulator()
+    obj.load_cobra_model(cobra_model)
+    model_status, objective, flux = obj.run_FBA(new_objective = target_reaction, mode='max')
+
+    max_target_production_rate = flux[target_reaction]
+    lb_target_production_rate = flux[target_reaction] * minimum_production_rate
+    flux_constraints[target_reaction] = [lb_target_production_rate, 1000.0]
+    model_status, objective, wild_flux = obj.run_FBA(new_objective = biomass_reaction, flux_constraints = flux_constraints, mode='max', internal_flux_minimization=True)
+    
     for each_reaction_set in tqdm.tqdm(combinatorial_reaction_sets): 
-        
-        flux_constraints = constraints
-
-        obj = Simulator.Simulator()
-        obj.load_cobra_model(cobra_model)
-        model_status, objective, flux = obj.run_FBA(new_objective = target_reaction, mode='max')
-        max_target_production_rate = flux[target_reaction]
-        lb_target_production_rate = flux[target_reaction] * minimum_production_rate
-        flux_constraints[target_reaction] = [lb_target_production_rate, 1000.0]
-        
-        model_status, objective, wild_flux = obj.run_FBA(new_objective = biomass_reaction, flux_constraints = flux_constraints, mode='max', internal_flux_minimization=True)
-
-        result_list = []
+        key_string = None
         for each_set in each_reaction_set:  
-            try:
-                key_string = ';'.join(each_reaction_set)
+            key_string = ';'.join(each_reaction_set)
+            
+        simulation_flux_constraints = {}
+        
+        for each_reaction in each_reaction_set:
+            simulation_flux_constraints[each_reaction] = [0.0, 0.0]
+        
+        model_status, objective, perturbed_flux = obj.run_MOMA(wild_flux=wild_flux, flux_constraints=simulation_flux_constraints)
+        biomass_flux = perturbed_flux[biomass_reaction]
+        target_flux = perturbed_flux[target_reaction]   
+        fp.write('%s\t%s\t%s\n'%(key_string, biomass_flux, target_flux))                
 
-                simulation_flux_constraints = {}
-                for each_reaction in each_reaction_set:
-                    simulation_flux_constraints[each_reaction] = [0.0, 0.0]
-
-                model_status, objective, perturbed_flux = obj.run_MOMA(wild_flux=wild_flux, flux_constraints=simulation_flux_constraints)
-                biomass_flux = perturbed_flux[biomass_reaction]
-                target_flux = perturbed_flux[target_reaction]   
-                fp.write('%s\t%s\t%s\n'%(key_string, biomass_flux, target_flux))                
-            except:
-                pass
     fp.close()
     return
 
@@ -91,7 +88,7 @@ def main():
     start = time.time()    
     warnings.filterwarnings("ignore")
     
-    model_file = './raw_data/iML1515.xml' # model file
+    model_file = './raw_data/iML1515_octa.xml' # iML1515.xml' # model file
     output_dir = './output' # output directory
     try:
         os.mkdir(output_dir)
@@ -100,12 +97,12 @@ def main():
     
     cobra_model = read_sbml_model(model_file)
     
-    biomass_reaction = 'BIOMASS_Ec_iML1515_core_75p37M' # biomass equation
-    target_reaction = 'EX_octa_e' # target reaction
+    biomass_reaction = 'BIOMASS_Ec_iML1515_core_75p37M' # 'BIOMASS_Ec_iML1515_core_75p37M' # biomass equation 
+    target_reaction = 'DM_octa_c' # target reaction
     
     constraints = {}
-    run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'reaction', 1)            
-#     run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'reaction', 2)
+    # run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'reaction', 1)            
+    run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'reaction', 2)
     run_FSEOF_targeting(output_dir, cobra_model, biomass_reaction, target_reaction)
     run_FVSEOF_targeting(output_dir, cobra_model, biomass_reaction, target_reaction)
     
