@@ -562,7 +562,7 @@ class Simulator(object):
         else:
             return m.status, False, False
 
-    def run_FBA(self, new_objective='', flux_constraints={}, inf_flag=False, internal_min_flag=False, mode='max'):
+    def run_FBA(self, new_objective='', flux_constraints={}, inf_flag=False, internal_min_flag=True, mode='max'):
         # print 'Start simple FBA simulation ... '
 
         model_metabolites = self.model_metabolites
