@@ -302,13 +302,13 @@ def main():
     cobra_model = read_sbml_model(model_file)
     
     constraints = {}
-#     if mode == 'gene':
-#         run_MOMA_targeting_gene(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'gene', 1)            
-#         # run_MOMA_targeting_gene(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'gene', 2)
-#     else:
-#         run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'reaction', 1)            
-#         # run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'reaction', 2)
-#     run_FSEOF_targeting(output_dir, cobra_model, biomass_reaction, target_reaction)
+    if mode == 'gene':
+        run_MOMA_targeting_gene(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'gene', 1)            
+        # run_MOMA_targeting_gene(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'gene', 2)
+    else:
+        run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'reaction', 1)            
+        # run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'reaction', 2)
+    run_FSEOF_targeting(output_dir, cobra_model, biomass_reaction, target_reaction)
 #     run_FVSEOF_targeting(output_dir, cobra_model, biomass_reaction, target_reaction)
     
     ## summary
