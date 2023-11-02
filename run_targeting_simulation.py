@@ -175,13 +175,12 @@ def target_summary(output_dir, cobra_model):
     df2.loc[candidate_reactions].to_csv(output_dir + '/fseof_summary_result_filtered.csv')
     
     ###############
-    fvseof_result_file = output_dir + '/fvseof_result_summary.csv'
-    df2 = pd.read_csv(fvseof_result_file, sep=',', index_col=0)
-    df2 = df2[abs(df2['AVG_R'])>0.8]
+#     fvseof_result_file = output_dir + '/fvseof_result_summary.csv'
+#     df2 = pd.read_csv(fvseof_result_file, sep=',', index_col=0)
+#     df2 = df2[abs(df2['AVG_R'])>0.8]
     
-    candidate_reactions = list(set(candidate_reactions) & set(df2.index))
-    df2.loc[candidate_reactions].to_csv(output_dir + '/fvseof_summary_result_filtered.csv')
-    
+#     candidate_reactions = list(set(candidate_reactions) & set(df2.index))
+#     df2.loc[candidate_reactions].to_csv(output_dir + '/fvseof_summary_result_filtered.csv')
     return
 
 def flux_response_analysis(output_dir, model, biomass_reaction, prod_target_reaction):
