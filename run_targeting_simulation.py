@@ -22,6 +22,8 @@ from me_targeting.flux_analysis import FSEOF
 from me_targeting.flux_analysis import FVSEOF
 from me_targeting.flux_analysis import Simulator
 
+from adjustText import adjust_text
+
 def run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, minimum_production_rate, constraints, targeting_mode='reaction', target_num=1):
 
     candidate_reactions = []    
@@ -150,6 +152,7 @@ def run_FVSEOF_targeting(output_dir, cobra_model, biomass_reaction, target_react
 def target_summary(output_dir, cobra_model):
     moma_result_file = output_dir + '/MOMA_result_target_num_1.txt'
     df = pd.read_csv(moma_result_file, sep='\t')
+    
     df = df[df['biomass flux'] > 0.05]
     target_genes = []
     for each_row, each_df in df.iterrows():
@@ -244,29 +247,32 @@ def flux_response_analysis(output_dir, model, biomass_reaction, prod_target_reac
         result_df.to_csv(output_dir+'/viz_summary_%s.csv'%(status))
         
     for status in ['DOWN', 'UP']:
-        df = pd.read_csv(output_dir+'/viz_summary_%s.csv'%(status), index_col=0)
+        df = pd.read_csv(output_dir + '/viz_summary_%s.csv' % (status), index_col=0)
         df = df.T
-        
+
         pca = PCA(n_components=2)
         pca_result = pca.fit_transform(df)
 
         plt.figure(figsize=(10, 7))
         plt.scatter(pca_result[:, 0], pca_result[:, 1], color='skyblue', label='Gene', alpha=0.8)
 
+        texts = []
         for i, label in enumerate(df.index):
-            plt.annotate(label, (pca_result[i, 0], pca_result[i, 1]), textcoords="offset points", xytext=(0, 10), ha='center')
-        
+            texts.append(plt.text(pca_result[i, 0], pca_result[i, 1], label, ha='center', va='center'))
+
+        adjust_text(texts)
+
         plt.title('PCA Visualization')
         plt.xlabel('PC_1')
         plt.ylabel('PC_2')
         plt.legend()
-        plt.savefig(output_dir + '/PCA_Visualization_%s.png'%(status), format='png')
+        plt.savefig(output_dir + '/PCA_Visualization_%s.png' % (status), format='png')
         plt.show()
-        
+
         # 클러스터링 히트맵 그리기
         plt.figure(figsize=(10, 7))
         sns.clustermap(df, method='average', cmap='vlag', col_cluster=False, figsize=(10, 7))
-        plt.savefig(output_dir + '/Clustering_%s.png'%(status), format='png')
+        plt.savefig(output_dir + '/Clustering_%s.png' % (status), format='png')
         plt.show()
     return
 
@@ -278,7 +284,6 @@ def sampling_analysis(output_dir, model, biomass_reaction, prod_target_reaction)
     except:
         pass
 
-    
     return
 
 def main():
@@ -308,12 +313,11 @@ def main():
         run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'reaction', 1)            
         # run_MOMA_targeting(output_dir, cobra_model, biomass_reaction, target_reaction, 0.1, constraints, 'reaction', 2)
     run_FSEOF_targeting(output_dir, cobra_model, biomass_reaction, target_reaction)
-#     run_FVSEOF_targeting(output_dir, cobra_model, biomass_reaction, target_reaction)
+    run_FVSEOF_targeting(output_dir, cobra_model, biomass_reaction, target_reaction)
     
-    ## summary
+#     # summary
     target_summary(output_dir, cobra_model)
     flux_response_analysis(output_dir, cobra_model, biomass_reaction, target_reaction)
-    sampling_analysis(output_dir, cobra_model, biomass_reaction, target_reaction)
     
     logging.info(time.strftime("Elapsed time %H:%M:%S", time.gmtime(time.time() - start)))
 
